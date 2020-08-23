@@ -1,0 +1,30 @@
+{
+  "name": "discord-giveaway",
+  "version": "1.0.0",
+  "description": "A npm package that creates giveaways.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gav-King/discord-giveaway.git"
+  },
+  "keywords": [
+    "discord.js-giveaway",
+    "discord-giveaway",
+    "giveaway",
+    "discord",
+    "discord.js"
+  ],
+  "author": "Gav",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Gav-King/discord-giveaway/issues"
+  },
+  "homepage": "https://github.com/Gav-King/discord-giveaway#readme",
+  "dependencies": {
+    "mongoose": "^5.10.0",
+    "node-schedule": "^1.3.2"
+  }
+}
