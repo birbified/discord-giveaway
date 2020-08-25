@@ -1,3 +1,4 @@
 module.exports = {
-    Creator: require('./src/Creator')
+    GiveawayCreator: require('./src/GiveawayCreator'),
+    DropCreator: require('./src/DropCreator')
 }

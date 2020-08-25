@@ -6,7 +6,7 @@ const { schedule, getWinner, endGiveaway } = require('./functions');
 const GiveawayModel = require('../models/GiveawayModel');
 const scheduler = require('node-schedule');
 
-class Creator {
+class GiveawayCreator {
     /**
      * 
      * @param {Discord.Client} client - A discord.js client.
@@ -123,6 +123,11 @@ class Creator {
         return data;
     }
 
+    /**
+     * 
+     * @param {string} messageId - A discord message ID.
+     */
+
     async fetchGiveaway(messageId) {
         const giveaway = await GiveawayModel.findOne({ messageId: messageId });
 
@@ -131,11 +136,16 @@ class Creator {
         return giveaway;
     }
 
+    /**
+     * 
+     * @param {string} messageId - A discord message ID.
+     */
+
     async rerollGiveaway(messageId) {
         const giveaway = await GiveawayModel.findOne({ messageId: messageId });
 
         if (!giveaway) return false;
-        if (data.hasEnded === 'False') return false;
+        if (giveaway.hasEnded === 'False') return false;
 
         const channel = this.client.channels.cache.get(giveaway.channelId);
 
@@ -165,6 +175,30 @@ class Creator {
         }
         return giveaway;
     }
+
+    /**
+     * 
+     * @param {string} guildId - A discord guild ID.
+     */
+
+    async listGiveaways(guildId) {
+        if (!guildId) throw new Error("Please provide a guild ID.");
+
+        const Giveaways = await GiveawayModel.find({ guildId: guildId, hasEnded: 'False' });
+
+        if (Giveaways.length < 1) return false;
+
+        const array = [];
+
+        Giveaways.map(i => array.push({
+            hostedBy: this.client.users.cache.get(i.hostedBy).tag ? this.client.users.cache.get(i.hostedBy).tag : "Nobody#0000",
+            timeRemaining: i.endsOn - Date.now(),
+            messageId: i.messageId,
+            prize: i.prize
+        }));
+
+        return array;
+    }
 }
 
-module.exports = Creator;
+module.exports = GiveawayCreator;
