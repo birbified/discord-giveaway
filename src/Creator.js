@@ -152,7 +152,7 @@ class Creator {
                 const winner = getWinner(entries, giveaway.winners);
                 const finalWinners = winner.map(user => user.toString()).join(', ');
 
-                message.channel.send(`Congratulations ${winner}, you won the **${data.prize}**!\n**ID**: \`${messageId}\`\n${message.url}`);
+                message.channel.send(`Congratulations ${winner}, you won the **${giveaway.prize}**!\n**ID**: \`${messageId}\`\n${message.url}`);
 
                 if (embeds.length === 1) {
                     const embed = embeds[0];
