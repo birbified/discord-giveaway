@@ -28,14 +28,14 @@ class DropCreator {
             if (message.author.bot) return;
             if (message.channel.type === 'dm') return;
 
-            const randomNumber = Math.round(Math.random() * 50);
+            const randomNumber = Math.round(Math.random() * 5);
 
-            if (randomNumber === 25) {
-                let Drops = await DropModel.find({ guildId: message.guild.id, channelId: message.channel.id });
+            if (randomNumber === 2) {
+                let Drops = await DropModel.findOne({ guildId: message.guild.id, channelId: message.channel.id });
 
-                if (Drops.length < 1) return;
+                if (!Drops) return;
 
-                const { guildId, channelId, prize, createdBy } = Drops[0];
+                const { guildId, channelId, prize, createdBy, timeCreated } = Drops;
 
                 const guild = this.client.guilds.cache.get(guildId);
                 const channel = guild.channels.cache.get(channelId);
@@ -49,10 +49,12 @@ class DropCreator {
 
                 const msg = await channel.send(DropEmbed);
 
-                const filter = (reaction, user) => !user.bot && '🎉'.includes(reaction.emoji.name);
+                await msg.react('🎉');
+
+                const filter = (reaction, user) => !user.bot;
                 const reaction = new Discord.ReactionCollector(msg, filter, { max: 1 });
 
-                reaction.on('collect', (reaction, user) => {
+                reaction.on('collect', async (reaction, user) => {
                     const { embeds } = msg;
 
                     const embed = embeds[0];
@@ -63,10 +65,36 @@ class DropCreator {
                     
                     await msg.edit(embed);
 
-                    await DropModel.findOneAndRemove({ guildId: message.guild.id, channelId: message.channel.id });
+                    msg.channel.send(`${user.toString()} won **${prize}**`);
+
+                    const rip = await Drops.remove();
                 });
             }
         });
+    }
+
+    /**
+     * 
+     * @param {DropOptions} options - Options for drop.
+     */
+
+    async createDrop(options) {
+        if (!options.prize) throw new Error("You didn't provide a prize.");
+        if (!options.guildId) throw new Error("You didn't provide a guild ID.");
+        if (!options.channelId) throw new Error("You didn't provide a channel ID.");
+        if (!options.createdBy) throw new Error("You didn't provide who the drop was created by.");
+
+        const newDrop = new DropModel({
+            guildId: options.guildId,
+            prize: options.prize,
+            channelId: options.channelId,
+            createdBy: options.createdBy,
+            timeCreated: new Date()
+        });
+
+        newDrop.save();
+
+        return newDrop;
     }
 }
 
