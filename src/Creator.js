@@ -122,6 +122,49 @@ class Creator {
         }
         return data;
     }
+
+    async fetchGiveaway(messageId) {
+        const giveaway = await GiveawayModel.findOne({ messageId: messageId });
+
+        if (!giveaway) return false;
+
+        return giveaway;
+    }
+
+    async rerollGiveaway(messageId) {
+        const giveaway = await GiveawayModel.findOne({ messageId: messageId });
+
+        if (!giveaway) return false;
+        if (data.hasEnded === 'False') return false;
+
+        const channel = this.client.channels.cache.get(giveaway.channelId);
+
+        if (channel) {
+            const message = await channel.messages.fetch(messageId);
+
+            if (message) {
+                const { embeds, reactions } = message;
+
+                const reaction = reactions.cache.get('🎉');
+                const users = await reaction.users.fetch();
+                const entries = users.filter(user => !user.bot).array();
+
+                const winner = getWinner(entries, giveaway.winners);
+                const finalWinners = winner.map(user => user.toString()).join(', ');
+
+                message.channel.send(`Congratulations ${winner}, you won the **${data.prize}**!\n**ID**: \`${messageId}\`\n${message.url}`);
+
+                if (embeds.length === 1) {
+                    const embed = embeds[0];
+
+                    embed.setDescription(`🎖️ Winner(s): ${finalWinners}`);
+
+                    await message.edit(embed);
+                }
+            }
+        }
+        return giveaway;
+    }
 }
 
 module.exports = Creator;
