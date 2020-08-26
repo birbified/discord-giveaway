@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const Discord = require('discord.js');
 const DropModel = require('../models/DropModel');
-const { listeners } = require('../models/DropModel');
 
 mongoose.set('useFindAndModify', false);
 
@@ -50,6 +49,8 @@ class DropCreator {
 
                 const msg = await channel.send(DropEmbed);
 
+                await Drops.remove();
+
                 await msg.react('🎉');
 
                 const filter = (reaction, user) => !user.bot;
@@ -67,8 +68,6 @@ class DropCreator {
                     await msg.edit(embed);
 
                     msg.channel.send(`${user.toString()} won **${prize}**`);
-
-                    const rip = await Drops.remove();
                 });
             }
         });
@@ -144,6 +143,26 @@ class DropCreator {
 
             return array;
         }
+    }
+
+    /**
+     * 
+     * @param {string} guildId - A discord guild ID.
+     * @param {number} position - The position of the drop. Use the listDrops function to find the position.
+     */
+
+    async deleteDrop(guildId, position) {
+        if (!guildId) throw new Error("You didn't provide a guild ID.");
+        if (!position) throw new Error("You didn't provide a position.");
+        if (isNaN(position)) throw new Error("Position must be a number.");
+
+        const data = await DropModel.findOne({ guildId: guildId, position: position });
+
+        if (!data) return false;
+
+        const rip = await DropModel.findOneAndRemove({ guildId: guildId, position: position });
+
+        return rip;
     }
 }
 
