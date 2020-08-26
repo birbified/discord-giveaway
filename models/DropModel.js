@@ -5,7 +5,8 @@ const DropSchema = new mongoose.Schema({
     channelId: String,
     prize: String,
     createdBy: String,
-    timeCreated: Date
+    timeCreated: Date,
+    position: Number
 });
 
 module.exports = mongoose.model('Drop', DropSchema);

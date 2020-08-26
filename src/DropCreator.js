@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Discord = require('discord.js');
 const DropModel = require('../models/DropModel');
+const { listeners } = require('../models/DropModel');
 
 mongoose.set('useFindAndModify', false);
 
@@ -28,9 +29,9 @@ class DropCreator {
             if (message.author.bot) return;
             if (message.channel.type === 'dm') return;
 
-            const randomNumber = Math.round(Math.random() * 5);
+            const randomNumber = Math.round(Math.random() * 30);
 
-            if (randomNumber === 2) {
+            if (randomNumber === 17) {
                 let Drops = await DropModel.findOne({ guildId: message.guild.id, channelId: message.channel.id });
 
                 if (!Drops) return;
@@ -84,17 +85,65 @@ class DropCreator {
         if (!options.channelId) throw new Error("You didn't provide a channel ID.");
         if (!options.createdBy) throw new Error("You didn't provide who the drop was created by.");
 
+        const sorted = await DropModel.find({ guildId: options.guildId }).sort([['position', 'descending']]).exec();
+
+        if (sorted.length < 1) {
+            const newDrop = new DropModel({
+                guildId: options.guildId,
+                prize: options.prize,
+                channelId: options.channelId,
+                createdBy: options.createdBy,
+                timeCreated: new Date(),
+                position: 1
+            });
+
+            return newDrop.save();
+        }
+        
+        const newSorted = sorted[0];
+
         const newDrop = new DropModel({
             guildId: options.guildId,
             prize: options.prize,
             channelId: options.channelId,
             createdBy: options.createdBy,
-            timeCreated: new Date()
+            timeCreated: new Date(),
+            position: parseInt(newSorted.position) + 1
         });
 
         newDrop.save();
 
         return newDrop;
+    }
+
+    /**
+     * 
+     * @param {string} guildId - A discord guild ID.
+     */
+
+    async listDrops(guildId) {
+        if (!guildId) throw new Error("Please provide a guild ID.");
+
+        const guild = this.client.guilds.cache.get(guildId);
+
+        if (guild) {
+            const drops = await DropModel.find({ guildId: guildId });
+
+            if (drops.length < 1) return false;
+
+            const finalDrops = drops.slice(0, 5);
+
+            const array = [];
+
+            finalDrops.map(i => array.push({
+                createdBy: this.client.users.cache.get(i.createdBy).tag ? this.client.users.cache.get(i.createdBy).tag : "Nobody#0000",
+                position: i.position,
+                prize: i.prize,
+                channel: guild.channels.cache.get(i.channelId).toString() ? guild.channels.cache.get(i.channelId).toString() : "Unknown Channel"
+            }));
+
+            return array;
+        }
     }
 }
 
