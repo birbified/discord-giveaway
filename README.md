@@ -2,6 +2,8 @@
 
 # discord-giveaway
 A package for giveaways and drops.
+# Examples
+[![Giveaway](/examples/giveaway.png)](/examples/giveaway.png) [![Drop](/examples/drop.png)](/examples/drop.png)
 # Start
 Start by creating a new GiveawayCreator.
 ```js
