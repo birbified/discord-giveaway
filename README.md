@@ -3,7 +3,7 @@
 # discord-giveaway
 A package for giveaways and drops.
 # Drops
-Go [here] to see how to use the drops.
+Go [here](https://github.com/Gav-King/discord-giveaway/blob/master/README.md#how-to-use-drops) to see how to use the drops.
 # Examples
 [![Giveaway](/examples/giveaway.png)](/examples/giveaway.png) [![Drop](/examples/drop.png)](/examples/drop.png)
 # Start
@@ -89,3 +89,60 @@ client.on('message', async message => {
 ```
 
 # How to Use Drops
+First, you need to create a new DropCreator.
+```js
+const Discord = require('discord.js');
+const client = new Discord.Client();
+const Giveaway = require('discord-giveaway');
+const DropCreator = new Giveaway.DropCreator(client, 'mongodb://...');
+```
+
+# Drop Methods
+##### createDrop(options)
+Creates a drop. **Example**:
+```js
+const channel = message.mentions.channels.first();
+const newDrop = await DropCreator.createDrop({
+    prize: 'Discord Nitro',
+    guildId: message.guild.id,
+    channelId: channel.id,
+    createdBy: message.author.id
+});
+
+message.channel.send(`Created a drop in ${channel}. The prize is **${newDrop.prize}**`);
+```
+
+##### deleteDrop(guildId, position)
+Deletes a drop. Find the position by using the listDrops() method.
+```js
+const args = message.content.split(' ').slice(1);
+
+const deleted = await DropCreator.deleteDrop(message.guild.id, parseInt(args[0]));
+
+if (!deleted) {
+    return message.channel.send('Doesn\'t exist :/');
+}
+
+message.channel.send('Deleted the Drop');
+```
+
+##### listDrops(guildId)
+Lists all the drops in a guild.
+```js
+const { MessageEmbed } = require('discord.js');
+const list = await DropCreator.listDrops(message.guild.id);
+
+if (!list) {
+    return message.channel.send('No Drops :/');
+}
+
+const mapped = list.map(i => `**${i.position}.** Channel: ${i.channel} | Prize: ${i.prize}`);
+
+const embed = new MessageEmbed()
+.setTitle('List of Drops')
+.setDescription(`${mapped.join('\n')}`)
+.setColor(message.guild.me.roles.highest.hexColor)
+.setFooter(client.user.tag, client.user.displayAvatarURL({ format: 'png', size: 512 }));
+
+message.channel.send(embed);
+```
