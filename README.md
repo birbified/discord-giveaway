@@ -2,6 +2,8 @@
 
 # discord-giveaway
 A package for giveaways and drops.
+# Drops
+Go [here] to see how to use the drops.
 # Examples
 [![Giveaway](/examples/giveaway.png)](/examples/giveaway.png) [![Drop](/examples/drop.png)](/examples/drop.png)
 # Start
@@ -83,4 +85,7 @@ client.on('message', async message => {
             message.channel.send(`${list.map(i => `\`${i.messageId}\` - **${i.prize}** | ${prettyMilliseconds(i.timeRemaining)} | Host: **${i.hostedBy}**`).join('\n')}`)
         }
     }
-});```
+});
+```
+
+# How to Use Drops
