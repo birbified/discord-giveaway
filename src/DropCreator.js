@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
 const Discord = require('discord.js');
 const DropModel = require('../models/DropModel');
+const { EventEmitter } = require('events');
 
 mongoose.set('useFindAndModify', false);
 
-class DropCreator {
+class DropCreator extends EventEmitter {
     /**
      * 
      * @param {Discord.Client} client - A discord.js client.
@@ -12,6 +13,8 @@ class DropCreator {
      */
 
     constructor(client, url = '') {
+        super();
+
         if (!client) throw new Error("A client wasn't provided.");
         if (!url) throw new Error("A connection string wasn't provided.");
 
@@ -35,7 +38,7 @@ class DropCreator {
 
                 if (!Drops) return;
 
-                const { guildId, channelId, prize, createdBy, timeCreated } = Drops;
+                const { guildId, channelId, prize, createdBy } = Drops;
 
                 const guild = this.client.guilds.cache.get(guildId);
                 const channel = guild.channels.cache.get(channelId);
@@ -68,6 +71,7 @@ class DropCreator {
                     await msg.edit(embed);
 
                     msg.channel.send(`${user.toString()} won **${prize}**`);
+                    this.emit('wonDrop', Drops);
                 });
             }
         });
@@ -78,7 +82,7 @@ class DropCreator {
      * @param {DropOptions} options - Options for drop.
      */
 
-    async createDrop(options) {
+    async createDrop(options) { 
         if (!options.prize) throw new Error("You didn't provide a prize.");
         if (!options.guildId) throw new Error("You didn't provide a guild ID.");
         if (!options.channelId) throw new Error("You didn't provide a channel ID.");
@@ -111,7 +115,7 @@ class DropCreator {
         });
 
         newDrop.save();
-
+        this.emit('dropCreate', newDrop);
         return newDrop;
     }
 
@@ -161,7 +165,7 @@ class DropCreator {
         if (!data) return false;
 
         const rip = await DropModel.findOneAndRemove({ guildId: guildId, position: position });
-
+        this.emit('dropDelete', rip);
         return rip;
     }
 }

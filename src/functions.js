@@ -2,6 +2,7 @@ const scheduler = require('node-schedule');
 const GiveawayModel = require('../models/GiveawayModel');
 
 function getWinner(users, max) {
+    if (users.length < 1) return false;
     if (users.length <= max) return users;
 
     const numbers = new Set();
@@ -19,12 +20,12 @@ function getWinner(users, max) {
     return array;
 }
 
-async function schedule(client, giveawayArray) {
+async function schedule(stuff, giveawayArray) {
     for(let i = 0; i < giveawayArray.length; i++) {
-        let { messageId, channelId, endsOn, hostedBy, prize, winners } = giveawayArray[i];
+        let { messageId, channelId, endsOn, prize, winners } = giveawayArray[i];
 
         scheduler.scheduleJob(`${messageId}`, endsOn, async () => {
-            const channel = client.channels.cache.get(channelId);
+            const channel = stuff.client.channels.cache.get(channelId);
 
             if (channel) {
                 const message = await channel.messages.fetch(messageId);
@@ -38,12 +39,24 @@ async function schedule(client, giveawayArray) {
                     if (embeds.length === 1) {
                         const embed = embeds[0];
                         const winner = getWinner(entries, winners);
-                        const finalWinners = winner.map(user => user.toString()).join(', ');
+                        let finalWinners;
+                        if (!winner) {
+                            finalWinners = 'Nobody Reacted';
+                        }
+                        else {
+                            finalWinners = winner.map(user => user.toString()).join(', ');
+                        }
                         embed.setDescription(`🎖️ Winner(s): ${finalWinners}`);
-                        embed.setFooter(client.user.username, client.user.displayAvatarURL({ format: 'png', size: 512 }));
+                        embed.setFooter(stuff.client.user.username, stuff.client.user.displayAvatarURL({ format: 'png', size: 512 }));
                         await message.edit(embed);
-                        message.channel.send(`Congratulations ${winner}, you won the **${prize}**!\n**ID**: \`${messageId}\`\n${message.url}`);
-                        endGiveaway(messageId);
+                        if (!winner) {
+                            message.channel.send(`Nobody reacted to the **${prize}** giveaway. **ID**: \`${messageId}\`\n${message.url}`);
+                        }
+                        else {
+                            message.channel.send(`Congratulations ${finalWinners}, you won the **${prize}**!\n**ID**: \`${messageId}\`\n${message.url}`);
+                        }
+                        const ended = await endGiveaway(messageId);
+                        stuff.emit('giveawayEnd', ended);
                     }
                 }
             }
@@ -57,6 +70,8 @@ async function endGiveaway(messageId) {
     data.hasEnded = 'True';
 
     await data.save();
+
+    return data;
 }
 
 module.exports = {

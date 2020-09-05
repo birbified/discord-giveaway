@@ -5,8 +5,9 @@ const moment = require('moment');
 const { schedule, getWinner, endGiveaway } = require('./functions');
 const GiveawayModel = require('../models/GiveawayModel');
 const scheduler = require('node-schedule');
+const { EventEmitter } = require('events');
 
-class GiveawayCreator {
+class GiveawayCreator extends EventEmitter {
     /**
      * 
      * @param {Discord.Client} client - A discord.js client.
@@ -14,6 +15,8 @@ class GiveawayCreator {
      */
 
     constructor(client, url = '') {
+        super();
+
         if (!client) throw new Error("A client wasn't provided.");
         if (!url) throw new Error("A connection string wasn't provided.");
 
@@ -31,7 +34,7 @@ class GiveawayCreator {
 
             const giveaways = await GiveawayModel.find({ endsOn: { $gt: now }, hasEnded: 'False' });
 
-            await schedule(this.client, giveaways);
+            await schedule(this, giveaways);
         });
     }
 
@@ -75,8 +78,8 @@ class GiveawayCreator {
         });
 
         msg.channel.send('Created the giveaway. 🎉');
-        await schedule(this.client, [newGiveaway]);
-
+        await schedule(this, [newGiveaway]);
+        this.emit('giveawayStart', newGiveaway);
         return newGiveaway;
     }
 
@@ -111,12 +114,24 @@ class GiveawayCreator {
                 if (embeds.length === 1) {
                     const embed = embeds[0];
                     const winner = getWinner(entries, data.winners);
-                    const finalWinners = winner.map(user => user.toString()).join(', ');
+                    let finalWinners;
+                    if (!winner) {
+                        finalWinners = 'Nobody Reacted';
+                    }
+                    else {
+                        finalWinners = winner.map(user => user.toString()).join(', ');
+                    }
                     embed.setDescription(`🎖️ Winner(s): ${finalWinners}`);
                     embed.setFooter(this.client.user.username, this.client.user.displayAvatarURL({ format: 'png', size: 512 }));
                     await message.edit(embed);
-                    message.channel.send(`Congratulations ${finalWinners}, you won the **${data.prize}**!\n**ID**: \`${messageId}\`\n${message.url}`);
-                    endGiveaway(messageId);
+                    if (!winner) {
+                        message.channel.send(`Nobody reacted to the **${data.prize}** giveaway. **ID**: \`${messageId}\`\n${message.url}`);
+                    }
+                    else {
+                        message.channel.send(`Congratulations ${finalWinners}, you won the **${data.prize}**!\n**ID**: \`${messageId}\`\n${message.url}`);
+                    }
+                    const ended = await endGiveaway(messageId);
+                    this.emit('giveawayEnd', ended);
                 }
             }
         }
@@ -160,9 +175,15 @@ class GiveawayCreator {
                 const entries = users.filter(user => !user.bot).array();
 
                 const winner = getWinner(entries, giveaway.winners);
-                const finalWinners = winner.map(user => user.toString()).join(', ');
-
-                message.channel.send(`Congratulations ${finalWinners}, you won the **${giveaway.prize}**!\n**ID**: \`${messageId}\`\n${message.url}`);
+                let finalWinners;
+                if (!winner) {
+                    finalWinners = 'Nobody Reacted';
+                    message.channel.send(`Nobody reacted to the **${giveaway.prize}** giveaway. **ID**: \`${messageId}\`\n${message.url}`);
+                }
+                else {
+                    finalWinners = winner.map(user => user.toString()).join(', ');
+                    message.channel.send(`Congratulations ${finalWinners}, you won the **${giveaway.prize}**!\n**ID**: \`${messageId}\`\n${message.url}`);
+                }
 
                 if (embeds.length === 1) {
                     const embed = embeds[0];
@@ -173,6 +194,7 @@ class GiveawayCreator {
                 }
             }
         }
+        this.emit('giveawayReroll', giveaway);
         return giveaway;
     }
 
