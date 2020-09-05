@@ -1,4 +1,4 @@
-[![NPM](https://nodei.co/npm/discord-giveaway.png)](https://nodei.co/npm/discord-giveaway/)
+[Click Here](https://npmjs.com/package/discord-giveaway)
 
 # discord-giveaway
 A package for giveaways and drops.
@@ -146,3 +146,65 @@ const embed = new MessageEmbed()
 
 message.channel.send(embed);
 ```
+# Events
+Here are some events you can use for the drops and giveaways.
+```js
+const { Client } = require('discord.js');
+const client = new Client();
+const { GiveawayCreator, DropCreator } = require('discord-giveaway');
+const giveaways = new GiveawayCreator(client, 'mongodb://...');
+const drops = new DropCreator(client, 'mongodb://...');
+
+client.login('some-token');
+
+DropCreator.on('dropCreate', drop => console.log(`New drop created with the prize of ${drop.prize}`));
+DropCreator.on('dropDelete', drop => console.log(`Deleted the ${drop.prize} drop.`));
+DropCreator.on('wonDrop', drop => console.log(`Someone won the ${drop.prize} drop.`));
+
+GiveawayCreator.on('giveawayEnd', giveaway => {
+    console.log(`The ${giveaway.prize} giveaway has ended at ${giveaway.endsOn}.`);
+});
+
+GiveawayCreator.on('giveawayStart', giveaway => {
+    console.log(`${giveaway.prize} giveaway has been scheduled for ${giveaway.endsOn}.`);
+});
+
+GiveawayCreator.on('giveawayReroll', giveaway => {
+    console.log(`Rerolled the ${giveaway.prize} giveaway.`);
+});
+```
+# Properties
+### Giveaway Properties
+##### guildId
+The guild ID of the giveaway.
+##### channelId
+The channel ID of the giveaway.
+##### hostedBy
+The ID of the person who hosted the giveaway.
+##### messageId
+The message ID of the giveaway.
+##### startsOn
+A date of when the giveaway started.
+##### endsOn
+A date of when the giveaway will end.
+##### winners
+The amount of winners the giveaway can have. 
+##### hasEnded
+Whether the giveaway has ended.
+##### duration
+The duration of the giveaway in milliseconds.
+##### prize
+The prize of the giveaway.
+### Drop Properties
+##### guildId
+The guild ID of the drop.
+##### channelId
+The channel ID of the drop.
+##### prize
+The prize of the drop.
+##### createdBy
+The ID of the person who created the drop.
+##### timeCreated
+The date when the drop was created.
+##### position
+The position of the drop.
