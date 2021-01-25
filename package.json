@@ -1,6 +1,6 @@
 {
   "name": "discord-giveaway",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "A npm package that creates giveaways.",
   "main": "index.js",
   "scripts": {
