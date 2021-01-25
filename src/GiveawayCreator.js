@@ -14,7 +14,7 @@ class GiveawayCreator extends EventEmitter {
      * @param {string} url - A MongoDB connection string.
      */
 
-    constructor(client, url = '') {
+    constructor(client, url = '', emoji = '🎉') {
         super();
 
         if (!client) throw new Error("A client wasn't provided.");
@@ -23,6 +23,8 @@ class GiveawayCreator extends EventEmitter {
         this.client = client;
 
         this.mongoUrl = url;
+        
+        this.emoji = emoji;
 
         mongoose.connect(this.mongoUrl, {
             useNewUrlParser: true,
@@ -63,7 +65,7 @@ class GiveawayCreator extends EventEmitter {
 
         const msg = await channel.send(giveawayEmbed);
 
-        await msg.react('🎉');
+        await msg.react(this.emoji);
         
         const newGiveaway = new Giveaway({
             prize: options.prize,
@@ -107,7 +109,7 @@ class GiveawayCreator extends EventEmitter {
 
             if (message) {
                 const { embeds, reactions } = message;
-                const reaction = reactions.cache.get('🎉');
+                const reaction = reactions.cache.get(this.emoji);
                 const users = await reaction.users.fetch();
                 const entries = users.filter(user => !user.bot).array();
 
@@ -170,7 +172,7 @@ class GiveawayCreator extends EventEmitter {
             if (message) {
                 const { embeds, reactions } = message;
 
-                const reaction = reactions.cache.get('🎉');
+                const reaction = reactions.cache.get(this.emoji);
                 const users = await reaction.users.fetch();
                 const entries = users.filter(user => !user.bot).array();
 
