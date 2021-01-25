@@ -61,7 +61,8 @@ class GiveawayCreator extends EventEmitter {
         .setColor(guild.me.roles.highest.hexColor)
         .setDescription(`🎖️ Winners: ${options.winners}
         🥳 Hosted By: ${this.client.users.cache.get(options.hostedBy).toString()}`)
-        .setFooter(`Ends ${moment.utc(new Date(Date.now() + options.duration)).format('lll')}`);
+        .setFooter(`Ends `)
+        .setTimestamp(new Date(Date.now() + options.duration));
 
         const msg = await channel.send(giveawayEmbed);
 
@@ -125,6 +126,7 @@ class GiveawayCreator extends EventEmitter {
                     }
                     embed.setDescription(`🎖️ Winner(s): ${finalWinners}`);
                     embed.setFooter(this.client.user.username, this.client.user.displayAvatarURL({ format: 'png', size: 512 }));
+                    embed.setTimestamp();
                     await message.edit(embed);
                     if (!winner) {
                         message.channel.send(`Nobody reacted to the **${data.prize}** giveaway. **ID**: \`${messageId}\`\n${message.url}`);
