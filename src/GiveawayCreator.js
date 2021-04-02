@@ -14,17 +14,16 @@ class GiveawayCreator extends EventEmitter {
      * @param {string} url - A MongoDB connection string.
      */
 
-    constructor(client, url = '', emoji = '🎉') {
+    constructor(client, url = '', emoji = '🎉', color = 0x7289da) {
         super();
 
         if (!client) throw new Error("A client wasn't provided.");
         if (!url) throw new Error("A connection string wasn't provided.");
 
         this.client = client;
-
         this.mongoUrl = url;
-        
         this.emoji = emoji;
+        this.color = color;
 
         mongoose.connect(this.mongoUrl, {
             useNewUrlParser: true,
@@ -58,7 +57,7 @@ class GiveawayCreator extends EventEmitter {
         
         const giveawayEmbed = new Discord.MessageEmbed()
         .setAuthor(options.prize)
-        .setColor(guild.me.roles.highest.hexColor)
+        .setColor(this.color)
         .setDescription(`🎖️ Winners: ${options.winners}
         🥳 Hosted By: ${this.client.users.cache.get(options.hostedBy).toString()}`)
         .setFooter(`Ends `)
