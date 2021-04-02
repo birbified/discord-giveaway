@@ -1,11 +1,5 @@
-[Click Here](https://npmjs.com/package/discord-giveaway)
-
-# Update 25/1/2021
-You can now do 
-```js
-const Creator = new GiveawayCreator(client, 'mongodb://...', 'unicode emoji');
-```
-For custom emojis.
+# Update 1/4/2021
+New embed color option for giveaways.
 # discord-giveaway
 A package for giveaways and drops.
 # Drops
