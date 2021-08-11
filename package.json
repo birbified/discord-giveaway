@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Gav-King/discord-giveaway.git"
+    "url": "git+https://github.com/birbified/discord-giveaway.git"
   },
   "keywords": [
     "discord.js-giveaway",
@@ -17,12 +17,12 @@
     "discord",
     "discord.js"
   ],
-  "author": "Gav",
+  "author": "birb",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Gav-King/discord-giveaway/issues"
+    "url": "https://github.com/birbified/discord-giveaway/issues"
   },
-  "homepage": "https://github.com/Gav-King/discord-giveaway#readme",
+  "homepage": "https://github.com/birbified/discord-giveaway#readme",
   "dependencies": {
     "discord.js": "^12.3.1",
     "events": "^3.2.0",
