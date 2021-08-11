@@ -48,7 +48,7 @@ async function schedule(stuff, giveawayArray) {
                         }
                         embed.setDescription(`🎖️ Winner(s): ${finalWinners}`);
                         embed.setFooter(stuff.client.user.username, stuff.client.user.displayAvatarURL({ format: 'png', size: 512 }));
-                        await message.edit(embed);
+                        await message.edit({ embeds: [embed] });
                         if (!winner) {
                             message.channel.send(`Nobody reacted to the **${prize}** giveaway. **ID**: \`${messageId}\`\n${message.url}`);
                         }
