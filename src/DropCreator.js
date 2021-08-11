@@ -50,7 +50,7 @@ class DropCreator extends EventEmitter {
                 .setColor(guild.me.roles.highest.hexColor)
                 .setTimestamp();
 
-                const msg = await channel.send(DropEmbed);
+                const msg = await channel.send({ embeds: [DropEmbed] });
 
                 await Drops.remove();
 
@@ -68,7 +68,7 @@ class DropCreator extends EventEmitter {
                     embed.setDescription(`${user.toString()} won \`${prize}\`.
                     Please contact ${this.client.users.cache.get(createdBy).toString()} to claim your prize!`);
                     
-                    await msg.edit(embed);
+                    await msg.edit({ embeds: [embed] });
 
                     msg.channel.send(`${user.toString()} won **${prize}**`);
                     this.emit('wonDrop', Drops);
